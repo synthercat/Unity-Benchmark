@@ -1,6 +1,6 @@
 # Benchmarking Script for Unity
 
-## Status : Working (Windows & Android)
+## Status : Working (Windows-Linux-Android)
 
 ### Description
 The point of this script is to load a spcecific scene as many times as quality
