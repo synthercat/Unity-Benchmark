@@ -94,11 +94,17 @@ public class BenchmarkScene : MonoBehaviour {
 			pather = System.Environment.GetFolderPath (System.Environment.SpecialFolder.MyDocuments).ToString () + "/UnityBench/";
 			break;
 
-		default:
-			Application.Quit ();
+		case RuntimePlatform.LinuxEditor:
+			pather = System.Environment.GetFolderPath (System.Environment.SpecialFolder.MyDocuments).ToString () + "/UnityBench/";
+			break;
+
+		case RuntimePlatform.LinuxPlayer:
+			pather = System.Environment.GetFolderPath (System.Environment.SpecialFolder.MyDocuments).ToString () + "/UnityBench/";
 			break;
 		}
 
+		if (pather == null)
+			Application.Quit ();
 		Directory.CreateDirectory(pather);
 
 		fileName =  pather + sceneToBenchmark +".txt";

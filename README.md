@@ -11,9 +11,10 @@ as well as a text file that contains some info about the benchmark.
 ### Usage
 - Add the script to an empty object of an empty scene
 - Add the name of the scene to test
-- Deply on device and run
-- Retrieve results
+- Deply both scenes to the target device and run
+- Retrieve results from the appropriate folder
 	- Windows : MyDocuments/UnityBench/
+	- Linux   : /home/$USER/UnityBench/
 	- Android : /sdcard/UnityBench/
 
 ### Ideas / Parts for contributions
