@@ -3,36 +3,39 @@
 ## Status : Working (Windows-Linux-Android)
 
 ### Description
-The point of this script is to load a spcecific scene as many times as quality
-pre-settings profiles exist. Then count the frames per seconds (not implemented yet)
-and also take a screenshot. Finaly you will have a folder with all the screenshots
-as well as a text file that contains some info about the benchmark.
+Use this script to see how your scene performs and shows on varius devices
 
 ### Usage
-- Add the script to an empty object of an empty scene
-- Add the name of the scene to test
-- Deply both scenes to the target device and run
-- Retrieve results from the appropriate folder
+Note : If you are benchmarking a Google VR scene, Add a GvrHead to the camera
+of that scene and disable tracking for both rotation and position to keep the
+camera still during benchmarking
+
+1. Add the script to an empty object of an empty scene
+- Choose the name of the scene to test
+- Choose a time offset for the scene to "settle" after loading
+- Choose how long will the scene run for FPS counting
+2. Deploy both scenes to the target device and run
+3. The script will load the scene as many times as the quality presets and will
+	- Count FPS
+	- Take a screenshot
+4. Wait for the app to close
+5. Retrieve results from the appropriate folder
 	- Windows : MyDocuments/UnityBench/
 	- Linux   : /home/$USER/UnityBench/
 	- Android : /sdcard/UnityBench/
 
-### Ideas / Parts for contributions
-Here is how I think it should work in it's final form
-- Loops through all quality settings
-- Opens the scene
-- Counts the seconds it takes to do that
-- Waits for x seconds for the scene to "settle"
-- Counts FPS for a specific period time
-- Maby takes a screenshoot too
-- writes that info somewere
-- Move on to another quality leve
-
-#### Future Ideas
+### Contributions / Ideas
+Feel free to contact me for these or other ideas you might have :
+- You could make the script get the GvrHead component from Google VR camera and disable
+it's tracking automaticaly. I am guessing this should be made with reflections method
+though, otherwise it would not run on non-GVR projects
+- Other Platforms support
 - GI settings
-- Cam animation
-- A Lot more options
-- More VR friendly (in case of head tracking)
+- Camera animation
+- More options
+
+### Issues
+It seems that on Android, the scipt will not over-write results
 
 ### Licence
-This project is under the MIT licence
+This project is under the MIT licence, FPS counter is my improved version of the Google VR SDK GvrFPS
