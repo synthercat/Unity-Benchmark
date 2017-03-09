@@ -31,23 +31,26 @@ public class BenchmarkScene : MonoBehaviour
 	private float timeToEnd;
 	private string pather; 	// Path for the file
 	private string fileName; // File name for the output info
+	private AsyncOperation async;
+	private IEnumerator coroutine;
 
 	// ----- END OF VARRIABLES -----
 
 	void Awake () // Calls for file preperation and stays in next scene
 	{
-		PrepareFile ();
 		DontDestroyOnLoad (transform.gameObject);
 	}
 
 	IEnumerator Start () // Loops throughout the Quality settings
 	{
+		coroutine = PrepareFile();
+		yield return coroutine;
 		string[] qNames = QualitySettings.names;
 		for (int i = 0; i < qNames.Length; i++) // Loop this for all quality presets
 		{
 			QualitySettings.SetQualityLevel (i, true);
 			timeToLoad = Time.time;
-			AsyncOperation async =	SceneManager.LoadSceneAsync (sceneToBenchmark);
+			async =	SceneManager.LoadSceneAsync (sceneToBenchmark);
 			yield return async;
 			timeToLoad = Time.time - timeToLoad;
 			textToWrite = "\r\n" + qNames[i].ToUpper() + "\r\n" + "Time to load = " + timeToLoad.ToString () + "\r\n";
@@ -78,7 +81,8 @@ public class BenchmarkScene : MonoBehaviour
 			              "Total F : " + fCount + "\r\n" +
 		                  "Average : " + (sumfps / fCount).ToString () + "\r\n";
 			File.AppendAllText (fileName, textToWrite);
-			StartCoroutine (WritePNG (pather.ToString () + qNames [i].ToString () + ".PNG"));
+			coroutine = WritePNG (pather.ToString () + qNames [i].ToString () + ".PNG");
+			yield return coroutine;
 		}
 		Application.Quit ();
 	}
@@ -110,7 +114,7 @@ public class BenchmarkScene : MonoBehaviour
 		File.WriteAllBytes (imgFileName, bytes);
 	}
 
-	void PrepareFile ()
+	IEnumerator PrepareFile ()
 	{
 		if (textToWrite != null)
 			textToWrite = textToWrite + "\r\n";    // Add a new line under the comments if there are any
@@ -148,6 +152,10 @@ public class BenchmarkScene : MonoBehaviour
 		fileName = pather + sceneToBenchmark + ".txt";
 		if (File.Exists (fileName))
 			File.Delete (fileName);
+		while (File.Exists (fileName)) 
+		{
+			yield return null;
+		}
 
 		File.AppendAllText (fileName, textToWrite);
 	}

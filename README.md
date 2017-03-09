@@ -6,9 +6,10 @@
 Use this script to see how your scene performs and shows on varius devices
 
 ### Usage
-Note : If you are benchmarking a Google VR scene, Add a GvrHead to the camera
+Note-1 : If you are benchmarking a Google VR scene, Add a GvrHead to the camera
 of that scene and disable tracking for both rotation and position to keep the
 camera still during benchmarking
+Note-2 : If on android go to `Player settings-> Other settings` and change Write Permission to `external`
 
 1. Add the script to an empty object of an empty scene
 - Choose the name of the scene to test
@@ -33,9 +34,6 @@ though, otherwise it would not run on non-GVR projects
 - GI settings
 - Camera animation
 - More options
-
-### Issues
-It seems that on Android, the scipt will not over-write results
 
 ### Licence
 This project is under the MIT licence, FPS counter is my improved version of the Google VR SDK GvrFPS
