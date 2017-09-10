@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.VR;
 using System.IO;
+
 
 public class BenchmarkScene : MonoBehaviour
 {
@@ -10,10 +12,11 @@ public class BenchmarkScene : MonoBehaviour
 	// ----- VARRIABLES -----
 
 	[Tooltip ("Write the name of the Scene to Benchmark here")]
-	public string sceneToBenchmark;
+	public string[] sceneToBenchmark;
 
 	[Tooltip ("Additional text-comments for the output file")]
-	public string textToWrite;
+	public string textToWriteAtFirstLine;
+
 	// Text to be written on the textfile
 
 	[Tooltip ("Seconds to wait before initiating measurement (avoids dropouts)")]
@@ -22,6 +25,7 @@ public class BenchmarkScene : MonoBehaviour
 	[Tooltip ("How long will every benchmark last?")]
 	public int secondsForBenchmark = 5;
 
+	private string textToWrite;
 	private float timeToLoad = 0; // Helper for counting the loading times
 	private float fps = 0f;
 	private float sumfps;
@@ -33,6 +37,7 @@ public class BenchmarkScene : MonoBehaviour
 	private string fileName; // File name for the output info
 	private AsyncOperation async;
 	private IEnumerator coroutine;
+	private int sc;
 
 	// ----- END OF VARRIABLES -----
 
@@ -41,48 +46,49 @@ public class BenchmarkScene : MonoBehaviour
 		DontDestroyOnLoad (transform.gameObject);
 	}
 
-	IEnumerator Start () // Loops throughout the Quality settings
+	IEnumerator Start () // Loops throughout the Defined scenes & Quality settings
 	{
-		coroutine = PrepareFile();
-		yield return coroutine;
 		string[] qNames = QualitySettings.names;
-		for (int i = 0; i < qNames.Length; i++) // Loop this for all quality presets
+		for (sc = 0; sc < sceneToBenchmark.Length; sc++)
 		{
-			QualitySettings.SetQualityLevel (i, true);
-			timeToLoad = Time.time;
-			async =	SceneManager.LoadSceneAsync (sceneToBenchmark);
-			yield return async;
-			timeToLoad = Time.time - timeToLoad;
-			textToWrite = "\r\n" + qNames[i].ToUpper() + "\r\n" + "Time to load = " + timeToLoad.ToString () + "\r\n";
-			File.AppendAllText (fileName, textToWrite);
-			sumfps = 0;
-			minfps = 1000f;
-			maxfps = 0f;
-			fCount = 0;
-			if (secondsBeforeStart < 1)
-				secondsBeforeStart = 1;
-			yield return new WaitForSeconds (secondsBeforeStart);
-			timeToEnd = Time.unscaledTime + secondsForBenchmark;
-			while (timeToEnd > Time.unscaledTime) 
-			{ // Count FPS
-				yield return new WaitForEndOfFrame ();
-				float deltaTime = Time.unscaledDeltaTime;
-				float interp = deltaTime / (0.5f + deltaTime);
-				float currentFPS = 1.0f / deltaTime;
-				if (fps == 0f)
-					fps = currentFPS;
-				fps = Mathf.Lerp (fps, currentFPS, interp);
-				sumfps += fps;
-				minfps = Mathf.Min (minfps, fps);
-				maxfps = Mathf.Max (maxfps, fps);
-				fCount++;
-			}
-			textToWrite = "Min FPS : " + minfps + " Max FPS : " + maxfps + "\r\n" +
-			              "Total F : " + fCount + "\r\n" +
-		                  "Average : " + (sumfps / fCount).ToString () + "\r\n";
-			File.AppendAllText (fileName, textToWrite);
-			coroutine = WritePNG (pather.ToString () + qNames [i].ToString () + ".PNG");
+			coroutine = PrepareFile ();
 			yield return coroutine;
+			for (int i = 0; i < qNames.Length; i++) { // Loop this for all quality presets
+				QualitySettings.SetQualityLevel (i, true);
+				timeToLoad = Time.time;
+				async =	SceneManager.LoadSceneAsync (sceneToBenchmark[sc]);
+				yield return async;
+				timeToLoad = Time.time - timeToLoad;
+				textToWrite = "\r\n" + qNames [i].ToUpper () + "\r\n" + "Time to load = " + timeToLoad.ToString () + "\r\n";
+				File.AppendAllText (fileName, textToWrite);
+				sumfps = 0;
+				minfps = 1000f;
+				maxfps = 0f;
+				fCount = 0;
+				if (secondsBeforeStart < 1)
+					secondsBeforeStart = 1;
+				yield return new WaitForSeconds (secondsBeforeStart);
+				timeToEnd = Time.unscaledTime + secondsForBenchmark;
+				while (timeToEnd > Time.unscaledTime) { // Count FPS
+					yield return new WaitForEndOfFrame ();
+					float deltaTime = Time.unscaledDeltaTime;
+					float interp = deltaTime / (0.5f + deltaTime);
+					float currentFPS = 1.0f / deltaTime;
+					if (fps == 0f)
+						fps = currentFPS;
+					fps = Mathf.Lerp (fps, currentFPS, interp);
+					sumfps += fps;
+					minfps = Mathf.Min (minfps, fps);
+					maxfps = Mathf.Max (maxfps, fps);
+					fCount++;
+				}
+				textToWrite = "Min FPS : " + minfps + " Max FPS : " + maxfps + "\r\n" +
+				"Total F : " + fCount + "\r\n" +
+				"Average : " + (sumfps / fCount).ToString () + "\r\n";
+				File.AppendAllText (fileName, textToWrite);
+				coroutine = WritePNG (pather.ToString () + sceneToBenchmark[sc] + "_" + "0" + i.ToString() + "_" + qNames [i].ToString () + ".PNG");
+				yield return coroutine;
+			}
 		}
 		Application.Quit ();
 	}
@@ -116,9 +122,9 @@ public class BenchmarkScene : MonoBehaviour
 
 	IEnumerator PrepareFile ()
 	{
-		if (textToWrite != null)
-			textToWrite = textToWrite + "\r\n";    // Add a new line under the comments if there are any
-		textToWrite = textToWrite + "Scene    : " + sceneToBenchmark + "\r\n";
+		textToWrite = textToWriteAtFirstLine;
+		textToWrite = textToWrite + "\r\n";    // Add a new line under the comments if there are any
+		textToWrite = textToWrite + "Scene    : " + sceneToBenchmark[sc] + "\r\n";
 		textToWrite = textToWrite + "Platform : " + Application.platform.ToString () + "\r\n";
 		
 		switch (Application.platform) 
@@ -149,7 +155,7 @@ public class BenchmarkScene : MonoBehaviour
 		
 		Directory.CreateDirectory (pather);
 
-		fileName = pather + sceneToBenchmark + ".txt";
+		fileName = pather + sceneToBenchmark[sc] + ".txt";
 		if (File.Exists (fileName))
 			File.Delete (fileName);
 		while (File.Exists (fileName)) 
